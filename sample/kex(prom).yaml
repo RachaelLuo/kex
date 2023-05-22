@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kex-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kex
+  namespace: kex-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kex
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+- kind: ServiceAccount
+  name: kex
+  namespace: kex-system
+- kind: ServiceAccount
+  name: prometheus-k8s
+  namespace: monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: kex
+  name: kex
+  namespace: kex-system
+spec:
+  selector:
+    matchLabels:
+      run: kex
+  template:
+    metadata:
+      labels:
+        run: kex
+    spec:
+      serviceAccount: kex
+      serviceAccountName: kex
+      containers:
+        - name: kex
+          args:
+            - --debug=false
+            - --port=8080
+            - --namespace=kex-system
+            - --basic-auth-user=admin
+            - --basic-auth-password=admin
+          command:
+            - /opt/app/kex
+          image: helenfrank/kex
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: "0.1"
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kex
+  namespace: kex-system
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    run: kex
+  type: NodePort
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  labels:
+    run: kex
+  name: kex
+  namespace: monitoring
+spec:
+  podMetricsEndpoints:
+  - interval: 5s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+    - kex-system
+  selector:
+    matchLabels:
+      run: kex
