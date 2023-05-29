@@ -20,11 +20,16 @@ func InstallHandlers(routerGroup *gin.RouterGroup, namespace, clusterInfos, loca
 		localClusterInfos: localClusterInfos,
 		client:            client,
 	}
-	routerGroup.POST("/apis/clusters/:clusterCode", h.addCluster)
-	routerGroup.DELETE("/apis/clusters/:clusterCode", h.removeCluster)
-	routerGroup.PUT("/apis/clusters/:clusterCode", h.updateCluster)
-	routerGroup.GET("/apis/clusters/:clusterCode", h.getCluster)
-	routerGroup.GET("/apis/clusters", h.getClusters)
-	routerGroup.PATCH("/apis/clusters/:clusterCode", h.applyCluster)
-	routerGroup.Any("/apis/proxy/v1/clusters/:clusterCode/*urlPath", h.proxyCluster)
+
+	// /apis/cluster/v1/
+	routerGroupV1 := routerGroup.Group("/v1")
+	{
+		routerGroupV1.POST("/code/:clusterCode", h.addCluster)
+		routerGroupV1.DELETE("/code/:clusterCode", h.removeCluster)
+		routerGroupV1.PUT("/code/:clusterCode", h.updateCluster)
+		routerGroupV1.GET("/code/:clusterCode", h.getCluster)
+		routerGroupV1.GET("/", h.getClusters)
+		routerGroupV1.PATCH("/code/:clusterCode", h.applyCluster)
+	}
+
 }

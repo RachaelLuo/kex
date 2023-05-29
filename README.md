@@ -1,7 +1,7 @@
 # kex
 
 ## Vision
-A quick start demo of a simple and reliable multi-cluster management platform for initial projects
+Become a kubernetes web extension and provide a low-threshold entry project for k8s newcomers.
 
 ## Quick Start
 1. kind creates a cluster

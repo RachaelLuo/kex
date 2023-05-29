@@ -53,7 +53,7 @@ spec:
             - --basic-auth-password=admin
           command:
             - /opt/app/kex
-          image: helenfrank/kex
+          image: huanchengsha/kex
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

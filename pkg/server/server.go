@@ -11,6 +11,7 @@ import (
 
 	"github.com/RachaelLuo/kex/pkg/apis/config"
 	"github.com/RachaelLuo/kex/pkg/server/handlers/clusters"
+	"github.com/RachaelLuo/kex/pkg/server/handlers/server"
 	"github.com/RachaelLuo/kex/pkg/server/middleware/auth"
 	"github.com/RachaelLuo/kex/pkg/server/middleware/monitor/prom"
 	"github.com/RachaelLuo/kex/pkg/zone/clientset"
@@ -59,5 +60,10 @@ func (s *Server) InstallHandlers() {
 		s.cfg.BasicAuthUser: s.cfg.BasicAuthPassword,
 	}))
 
-	clusters.InstallHandlers(authorized, s.cfg.NameSpace, s.cfg.ClusterInfos, s.cfg.LocalClusterInfos, s.client)
+	apiGroup := authorized.Group("/apis")
+	{
+		clusters.InstallHandlers(apiGroup.Group("/cluster"), s.cfg.NameSpace, s.cfg.ClusterInfos, s.cfg.LocalClusterInfos, s.client)
+		server.InstallHandlers(apiGroup.Group("/server"), s.client)
+	}
+
 }
